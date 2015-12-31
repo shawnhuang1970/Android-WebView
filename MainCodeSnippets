@@ -1,0 +1,52 @@
+
+//refer to http://developer.android.com/guide/webapps/webview.html
+
+MainView.xml
+<?xml version="1.0" encoding="utf-8"?>
+<WebView  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/webview"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+/>
+
+
+//Manifest.xml
+<manifest ... >
+    <uses-permission android:name="android.permission.INTERNET" />
+    ...
+</manifest>
+
+//MyWebViewClient.java
+private class MyWebViewClient extends WebViewClient {
+    @Override
+    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        if (Uri.parse(url).getHost().equals("www.example.com")) {
+            // This is my web site, so do not override; let my WebView load the page
+            return false;
+        }
+        // Otherwise, the link is not for a page on my site, so launch another Activity that handles URLs
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(intent);
+        return true;
+    }
+}
+
+//MainActivity.java
+WebView myWebView = (WebView) findViewById(R.id.webview);
+myWebView.getSettings().setJavaScriptEabled(true);
+myWebView.setWebViewClient(new MyWebViewClient());
+
+/*navigation keys*/
+@Override
+public boolean onKeyDown(int keyCode, KeyEvent event) {
+    // Check if the key event was the Back button and if there's history
+    if ((keyCode == KeyEvent.KEYCODE_BACK) && myWebView.canGoBack()) {
+        myWebView.goBack();
+        return true;
+    }
+    // If it wasn't the Back key or there's no web page history, bubble up to the default
+    // system behavior (probably exit the activity)
+    return super.onKeyDown(keyCode, event);
+}
+
+myWebView.loadUrl("http://www.example.com");
